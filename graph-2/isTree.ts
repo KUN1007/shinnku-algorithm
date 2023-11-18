@@ -59,59 +59,47 @@ const adjacencyMatrix: number[][] = [
 const graph = new Graph(adjacencyMatrix)
 const rootNode = graph.findRootNode()
 
-// code
+const isTree = (rootNode: GraphNode | null): boolean => {
+  if (!rootNode) {
+    // Empty graph is a tree
+    return true
+  }
 
-const dfsCountNodes = (rootNode: GraphNode) => {
-  const visited = new Set<GraphNode>()
-  const stack = [rootNode]
+  const visited: Set<GraphNode> = new Set()
 
-  while (stack.length) {
-    const currentNode = stack.pop()
-
-    if (!currentNode) {
-      break
+  const dfs = (node: GraphNode | null, parent: GraphNode | null): boolean => {
+    if (!node) {
+      return true
     }
 
-    visited.add(currentNode)
+    if (visited.has(node)) {
+      return false
+    }
 
-    for (const neighbor of currentNode.neighbors) {
-      if (!visited.has(neighbor)) {
-        stack.push(neighbor)
+    visited.add(node)
+
+    for (const neighbor of node.neighbors) {
+      if (neighbor !== parent && !dfs(neighbor, node)) {
+        return false
       }
     }
+
+    return true
   }
 
-  return visited.size
+  return dfs(rootNode, null) && visited.size === countNodes(rootNode)
 }
 
-const createAdjacencyMatrix = (rootNode: GraphNode | null): number[][] => {
-  if (!rootNode) {
-    return []
+const countNodes = (node: GraphNode | null): number => {
+  if (!node) {
+    return 0
   }
 
-  // Method1: calculate node sum ,because this.nodes.push(new GraphNode(i))
-  // const numNodes = rootNode.val + 1
-  const adjacencyMatrix: number[][] = []
+  let count = 1
 
-  // Method2: calculate node sum
-  const numNodes = dfsCountNodes(rootNode)
-
-  // initialize
-  for (let i = 0; i < numNodes; i++) {
-    adjacencyMatrix.push(Array(numNodes).fill(0))
+  for (const neighbor of node.neighbors) {
+    count += countNodes(neighbor)
   }
 
-  const dfs = (node: GraphNode) => {
-    for (const neighbor of node.neighbors) {
-      adjacencyMatrix[neighbor.val][node.val] = 1
-      dfs(neighbor)
-    }
-  }
-
-  dfs(rootNode)
-
-  return adjacencyMatrix
+  return count
 }
-
-console.table(adjacencyMatrix)
-console.table(createAdjacencyMatrix(rootNode))

@@ -59,59 +59,33 @@ const adjacencyMatrix: number[][] = [
 const graph = new Graph(adjacencyMatrix)
 const rootNode = graph.findRootNode()
 
-// code
+const isBipartite = (rootNode: GraphNode | null): boolean => {
+  if (!rootNode) {
+    // Empty graph is a bipartite
+    return true
+  }
 
-const dfsCountNodes = (rootNode: GraphNode) => {
-  const visited = new Set<GraphNode>()
-  const stack = [rootNode]
+  const colors: Map<GraphNode, number> = new Map()
+  const queue: GraphNode[] = []
 
-  while (stack.length) {
-    const currentNode = stack.pop()
+  queue.push(rootNode)
+  colors.set(rootNode, 0)
 
-    if (!currentNode) {
-      break
-    }
+  while (queue.length > 0) {
+    const node: GraphNode = queue.shift() as GraphNode
+    const currentColor: number = colors.get(node) as number
 
-    visited.add(currentNode)
-
-    for (const neighbor of currentNode.neighbors) {
-      if (!visited.has(neighbor)) {
-        stack.push(neighbor)
+    for (const neighbor of node.neighbors) {
+      if (!colors.has(neighbor)) {
+        colors.set(neighbor, 1 - currentColor)
+        queue.push(neighbor)
+      } else if (colors.get(neighbor) === currentColor) {
+        return false
       }
     }
   }
 
-  return visited.size
+  return true
 }
 
-const createAdjacencyMatrix = (rootNode: GraphNode | null): number[][] => {
-  if (!rootNode) {
-    return []
-  }
-
-  // Method1: calculate node sum ,because this.nodes.push(new GraphNode(i))
-  // const numNodes = rootNode.val + 1
-  const adjacencyMatrix: number[][] = []
-
-  // Method2: calculate node sum
-  const numNodes = dfsCountNodes(rootNode)
-
-  // initialize
-  for (let i = 0; i < numNodes; i++) {
-    adjacencyMatrix.push(Array(numNodes).fill(0))
-  }
-
-  const dfs = (node: GraphNode) => {
-    for (const neighbor of node.neighbors) {
-      adjacencyMatrix[neighbor.val][node.val] = 1
-      dfs(neighbor)
-    }
-  }
-
-  dfs(rootNode)
-
-  return adjacencyMatrix
-}
-
-console.table(adjacencyMatrix)
-console.table(createAdjacencyMatrix(rootNode))
+console.log(isBipartite(rootNode))
